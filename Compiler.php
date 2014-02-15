@@ -11,7 +11,7 @@ namespace Solve\Slot;
 use Solve\Slot\Blocks\BaseBlock;
 use Solve\Storage\ArrayStorage;
 use Solve\Utils\Inflector;
-
+require_once 'vendor/autoload.php';
 
 /**
  * Class Compiler
@@ -23,7 +23,6 @@ use Solve\Utils\Inflector;
  * @author Alexandr Viniychuk <alexandr.viniychuk@icloud.com>
  */
 class Compiler {
-
 
     /**
      * @var ArrayStorage tokens found stack
@@ -43,7 +42,15 @@ class Compiler {
     /**
      * @var ArrayStorage
      */
-    private $_config;
+    private $_config            = array(
+        'commentStart'  => '{#',
+        'commentEnd'    => '#}',
+
+        'tokenStart'    => '{{',
+        'tokenEnd'      => '}}',
+
+        'blockClose'    => 'end',
+    );
 
     private $_escapingStrategy  = 'html';
     /**
@@ -51,47 +58,83 @@ class Compiler {
      */
     private $_slotInstance;
 
+    /**
+     * @var array methods that available as system modifiers
+     */
     private $_predefinedMethods = array(
         'empty', 'is_null', 'isset', 'var_dump'
     );
 
-    public function __construct(ArrayStorage $config, Slot $slot) {
-        $this->_config = $config;
+    /**
+     * @param Slot $slot
+     */
+    public function __construct(Slot $slot = null) {
+        $this->_config          = new ArrayStorage((array)$this->_config);
 
-        $this->_tokenStack   = new ArrayStorage();
-        $this->_blocks       = new ArrayStorage();
-        $this->_slotInstance = $slot;
+        $this->_tokenStack      = new ArrayStorage();
+        $this->_blocks          = new ArrayStorage();
+        $this->_slotInstance    = $slot;
     }
 
-    public function getSlot() {
-        return $this->_slotInstance;
+    /**
+     * Set config value partially of completely
+     * @param $name
+     * @param $value
+     * @return $this
+     */
+    public function setConfig($name, $value) {
+        if (is_null($name)) {
+            $this->_config = new ArrayStorage($value);
+        } else {
+            $this->_config->setDeepValue($name, $value);
+        }
+        return $this;
     }
 
-    public function processSource($source) {
-        $source = preg_replace('/'.$this->_config['commentStart'] . '.*' . $this->_config['commentEnd'] .'/sU', '', $source);
-
-        $result = preg_replace_callback('#'.$this->_config['tokenStart']. '(.*)' . $this->_config['tokenEnd']. '#smU', array($this, 'onTokenFound'), $source);
-        return $result;
-    }
-
+    /**
+     * Register functional block for compiler. Each block should be represented with Class
+     * @param $blockTag
+     * @param $info
+     */
     public function registerBlock($blockTag, $info) {
         $this->_blocks[$blockTag] = $info;
     }
 
-    public function parseSpacedArguments($string) {
-        $string      = trim($string);
-        $paramsParts = explode(' ', $string);
-        $args        = array();
-        foreach ($paramsParts as $part) {
-            if (!empty($part)) {
-                if (is_string($part) && $part[0] == "'" && $part[strlen($part)-1] == "'") {
-                    $part = substr($part, 1, -1);
-                }
-                $args[] = $part;
-            }
-        }
+    /**
+     * @param $source
+     * @return mixed
+     */
+    public function stripComments($source) {
+        $source = preg_replace('/' . $this->_config['commentStart'] . '.*' . $this->_config['commentEnd'] . '/sU', '', $source);
+        return $source;
+    }
 
-        return $args;
+    /**
+     * @param string $expression
+     * @return string result
+     */
+    public function compileExpression($expression) {
+        $result = '';
+
+        $bracedRegexp = '#\[(.*)\]#ism';
+        $braced = array();
+        preg_match_all($bracedRegexp, $expression, $braced);
+        vd($expression, $braced);
+
+
+        return $result;
+    }
+
+    /**
+     * Main compilartor function
+     * @param $source
+     * @return mixed
+     */
+    public function compileSource($source) {
+        $source = $this->stripComments($source);
+
+        $result = preg_replace_callback('#'.$this->_config['tokenStart']. '(.*)' . $this->_config['tokenEnd']. '#smU', array($this, 'onTokenFound'), $source);
+        return $result;
     }
 
     /**
@@ -417,6 +460,40 @@ class Compiler {
      */
     public function getEscapingStrategy() {
         return $this->_escapingStrategy;
+    }
+
+    /**
+     * Set Slot instance
+     * @param Slot $slot
+     */
+    public function setSlot(Slot $slot) {
+        $this->_slotInstance = $slot;
+    }
+
+    /**
+     * Get Slot instance
+     * @return Slot
+     */
+    public function getSlot() {
+        return $this->_slotInstance;
+    }
+
+
+
+    public function parseSpacedArguments($string) {
+        $string      = trim($string);
+        $paramsParts = explode(' ', $string);
+        $args        = array();
+        foreach ($paramsParts as $part) {
+            if (!empty($part)) {
+                if (is_string($part) && $part[0] == "'" && $part[strlen($part)-1] == "'") {
+                    $part = substr($part, 1, -1);
+                }
+                $args[] = $part;
+            }
+        }
+
+        return $args;
     }
 
 

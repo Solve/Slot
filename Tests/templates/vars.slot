@@ -1,0 +1,40 @@
+{{ var1|trim }}
+{# <?php if (!empty($__lv['var1'])) echo htmlentities($__lv['var1']);  #}
+
+{{ if (user.name == 'huy(') }}
+
+{{ include "templates/" }}
+
+{{ if user.name == "vasya" || user.name == var1  || (user['name'] == var1) || (user[var1].config[settting.nameField] == 'genya')}}
+
+{#{{if object[fieldName]['link']}}#}
+
+{{ user.name == "vasya" || user.name == var1 }}
+{# user[var1].config[settting.nameField]  #}
+{# user[var1]['config'][settting.nameField]  #}
+{# user[var1][ config[settting.nameField] ]  #}
+{# $__lv['user'][$__lv['var1']]['config'][ $__lv['settting']['nameField'] ]  #}
+
+
+
+
+{{ user[field.name]->getField('name') }}
+
+{{ user['field'.nameField.name] }}
+{{ user['field'][ ['nameField']['name'] ] }}
+
+{{ user['field' ~ nameField['name'] ] }}
+
+
+
+{{ user['field' ~ (nameField ? nameField : 'Default')] }}
+
+
+priorities:
+
+0. Divide by "[]"           / recursion
+1. Divide by "()"           / recursion
+2. Check for ternar operator
+3. Divide by logical        - array of tokens (==,||,!=,!==,===)
+4. Divide by "operands"     - array of tokens (+,-,*,/,~,%,=)
+5. Divide by "."            - array of points

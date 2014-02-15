@@ -28,15 +28,7 @@ class Slot {
      * @var array config
      */
     private $_config = array(
-        'commentStart'  => '{#',
-        'commentEnd'    => '#}',
-
-        'tokenStart'    => '{{',
-        'tokenEnd'      => '}}',
-
-        'blockClose'    => 'end',
         'forceCompile'  => true,
-
     );
 
     /**
