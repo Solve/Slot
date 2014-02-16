@@ -1,0 +1,2 @@
+{{ include "01.if.slot" }}
+{{ include fields[name]->getTemplatePath() }}

@@ -1,0 +1,2 @@
+{{ foreach user in users |noif}}
+{{ foreachend }}

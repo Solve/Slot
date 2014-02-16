@@ -450,18 +450,11 @@ class Compiler {
 
     public function parseSpacedArguments($string) {
         $string      = trim($string);
-        $paramsParts = explode(' ', $string);
-        $args        = array();
-        foreach ($paramsParts as $part) {
-            if (!empty($part)) {
-                if (is_string($part) && $part[0] == "'" && $part[strlen($part)-1] == "'") {
-                    $part = substr($part, 1, -1);
-                }
-                $args[] = $part;
-            }
-        }
+        $spacedParts = array();
+        $spacePattern = '#"(?:\\\\.|[^\\\\"])*"|\S+#';
+        preg_match_all($spacePattern, $string, $spacedParts);
 
-        return $args;
+        return $spacedParts[0];
     }
 
 

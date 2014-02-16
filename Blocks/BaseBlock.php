@@ -29,6 +29,8 @@ abstract class BaseBlock {
 
     protected $_params;
 
+    protected $_modifiers;
+
     /**
      * @var Compiler
      */
@@ -43,6 +45,25 @@ abstract class BaseBlock {
         $this->_compiler = $compiler;
         $this->_id       = ++self::$_idCounter;
         $this->_params   = $this->_compiler->parseSpacedArguments($token);
+        foreach($this->_params as $key=>$param) {
+            if ($param[0] == '|') {
+                unset($this->_params[$key]);
+                $this->_modifiers[] = substr($param, 1);
+            }
+        }
+//        if (strpos($this->_token, '|') !== false) {
+//            $modifiers = array();
+//            preg_match_all('#\|[\w]+#', $token, $modifiers);
+//            if (!empty($modifiers[0])) {
+//                foreach($modifiers[0] as $modifier) {
+//                    $this->_modifiers[] = substr($modifier, 1);
+//                }
+//            }
+//        }
+    }
+
+    protected function hasModifier($modifier) {
+        return in_array($modifier, $this->_modifiers);
     }
 
     public function processBlockStart() {

@@ -88,7 +88,9 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
 
     public function testControlTemplate() {
         $this->_slot->getCompiler()->setEscapingStrategy('none');
-        $this->_testFileTemplates('templates/control_structure/01.if.slot');
+        $this->_testFileTemplates('templates/control_structure/01.include.slot');
+        $this->_testFileTemplates('templates/control_structure/02.if.slot');
+        $this->_testFileTemplates('templates/control_structure/03.foreach.slot');
     }
 
     protected function _testFileTemplates($path) {
