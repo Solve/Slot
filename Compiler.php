@@ -11,7 +11,6 @@ namespace Solve\Slot;
 use Solve\Slot\Blocks\BaseBlock;
 use Solve\Storage\ArrayStorage;
 use Solve\Utils\Inflector;
-require_once 'vendor/autoload.php';
 
 /**
  * Class Compiler
