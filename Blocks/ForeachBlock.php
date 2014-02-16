@@ -22,8 +22,10 @@ use Solve\Storage\ParametersStorage;
  */
 class ForeachBlock extends BaseBlock {
 
+    static private $_callStack  = array();
+
     public function processBlockStart() {
-        $res = '<?php ';
+        $res            = '<?php ';
         $params         = new ParametersStorage($this->_params, 'index', null, 'from');
 
         $extendedParams = array('index', null, 'from', 'key', 'name');
@@ -40,30 +42,44 @@ class ForeachBlock extends BaseBlock {
             }
         }
 
+        $countName  = substr(md5(time()), 0, 10);
         $varFrom    = $this->_compiler->compileExpression($params['from']);
         $varKey     = $params['key'];
         $varItem    = '$__lv[\'' . $params['index'] . '\']';
 
-//        if (!$this->hasModifier('noif')) {
-//        }
-        $ifFrom = strpos($varFrom, '()') === false ? $varFrom : '$__lv';
-        $res .= 'if (!empty('.$ifFrom.') && count( '.$ifFrom.')) :' . "\n";
+        self::$_callStack[] = array(
+            'modifiers' => $this->_modifiers,
+            'countName' => $countName
+        );
 
-        $count_name = substr(md5(time()), 0, 10);
-        $foreachItemsVar = '$__lv[\'foreach_items_' . $count_name . '\']';
+        if (!$this->hasModifier('noif')) {
+            $ifFrom = strpos($varFrom, '()') === false ? $varFrom : '$__lv';
+            $res .= 'if (!empty('.$ifFrom.') && count( '.$ifFrom.')) :' . "\n";
+        }
+        if (!$this->hasModifier('nocount')) {
+            $foreachItemsVar = '$__lv[\'foreach_items_' . $countName . '\']';
+            $res .= $foreachItemsVar .' = '.$varFrom.';' . "\n";
+            $res .= '$__lv[\'foreach_count_'.$countName.'\'] = count('.$foreachItemsVar.');' . "\n";
+        } else {
+            $foreachItemsVar = $varFrom;
+        }
 
-        $res .= $foreachItemsVar .' = '.$varFrom.';' . "\n";
-        $res .= '$__lv[\'foreach_count_'.$count_name.'\'] = count('.$foreachItemsVar.');' . "\n";
+
         $res .= 'foreach(' . $foreachItemsVar;
-        $res .= ' as ' . ($varKey ? '$__lv[\''.$varKey.'\'] => ' : '') . $varItem . ') :?>';
+        $res .= ' as ' . ($varKey ? '$__lv[\''.$varKey.'\'] => ' : '') . $varItem . ') : ?>';
 
         return $res;
     }
 
     public function processBlockEnd() {
-        $endforeachblock = 'endforeach; ';
-        return '<?php '. $endforeachblock .'endif; ?>';
+        $call               = array_pop(self::$_callStack);
+        $endIfBlock         = in_array('noif', $call['modifiers']) ? '' : ' endif;';
+        $endForeachBlock    = array_key_exists('foreachElse', $call) ? '' : 'endforeach;';
+        return '<?php '. $endForeachBlock . $endIfBlock . ' ?>';
     }
 
 
+    public static function setForeachElse() {
+        self::$_callStack[count(self::$_callStack) - 1]['foreachElse'] = true;
+    }
 } 

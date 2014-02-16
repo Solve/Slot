@@ -1,2 +1,8 @@
-{{ foreach user in users |noif}}
-{{ foreachend }}
+{{ foreach user in users |noif|nocount}}
+{{ endforeach }}
+
+{#{{ foreach user in users}}#}
+{#1#}
+{#{{ foreachelse }}#}
+{#2#}
+{#{{ endforeach }}#}

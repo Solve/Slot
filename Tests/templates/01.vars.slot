@@ -1,5 +1,6 @@
 {{ info }}
 {{ info|raw:full }}
+{{ 2+2-3 }}
 {{ " hello from string " }}
 {{ " hello from string "|trim }}
 {{ (user.name|trim == "vasya") }}

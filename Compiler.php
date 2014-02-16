@@ -220,6 +220,9 @@ class Compiler {
         if (($var[0] == $this->_hashScopeChar) && ($var[strlen($var) - 1] == $this->_hashScopeChar)) {
             return $var;
         }
+        if (is_numeric($var)) {
+            return $var;
+        }
         if (!empty($pregMatchResult[1]) && ($pregMatchResult[1] == '->')) {
             return $var;
         }
