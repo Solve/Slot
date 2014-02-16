@@ -5,6 +5,6 @@
 ((a == b) || (c == d))
 ((a.a == b) || (c.a == d))
 ((a.a == b.b) || (c.a == d.b))
-(item.name == "vasya")
+(item.name == "sasha")
 (item[fieldName] == fields[fieldName].value)
 (item[fieldName] == fields[fieldName]['value'])

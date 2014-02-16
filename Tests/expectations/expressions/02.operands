@@ -5,6 +5,6 @@
 (($__lv['a'] == $__lv['b']) || ($__lv['c'] == $__lv['d']))
 (($__lv['a']['a'] == $__lv['b']) || ($__lv['c']['a'] == $__lv['d']))
 (($__lv['a']['a'] == $__lv['b']['b']) || ($__lv['c']['a'] == $__lv['d']['b']))
-($__lv['item']['name'] == "vasya")
+($__lv['item']['name'] == "sasha")
 ($__lv['item'][$__lv['fieldName']] == $__lv['fields'][$__lv['fieldName']]['value'])
 ($__lv['item'][$__lv['fieldName']] == $__lv['fields'][$__lv['fieldName']]['value'])

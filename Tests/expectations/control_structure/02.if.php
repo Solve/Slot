@@ -6,7 +6,7 @@ hello b
 not hello
 <?php endif; ?>
 
-<?php if (strtolower($__lv['user']['name']) == "vasya"): ?>
+<?php if (strtolower($__lv['user']['name']) == "sasha"): ?>
 ok
 <?php endif; ?>
 

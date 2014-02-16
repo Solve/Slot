@@ -1,0 +1,11 @@
+Hello, {{ name }}!
+
+{{ foreach product in products }}
+{{ product.id }}: {{ product.title }}
+{{ endforeach }}
+
+{{ name|strtolower }} {{ float+2 }} {{ (float+2)*2 }}
+
+{{ if (float+2 > 10) }}
+more then 10
+{{ endif }}

@@ -6,7 +6,7 @@ hello b
 not hello
 {{ endif }}
 
-{{ if user.name|strtolower == "vasya" }}
+{{ if user.name|strtolower == "sasha" }}
 ok
 {{ endif }}
 

@@ -1,4 +1,4 @@
 a|var_dump
-(username|strtolower == "vasya")
-(user['name']|strtolower == "vasya")
-(user.name|trim|strtolower == "vasya")
+(username|strtolower == "sasha")
+(user['name']|strtolower == "sasha")
+(user.name|trim|strtolower == "sasha")

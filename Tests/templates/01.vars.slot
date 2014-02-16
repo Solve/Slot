@@ -3,6 +3,6 @@
 {{ 2+2-3 }}
 {{ " hello from string " }}
 {{ " hello from string "|trim }}
-{{ (user.name|trim == "vasya") }}
+{{ (user.name|trim == "sasha") }}
 {{ var info = "hello" }}
 {{ var fieldName = fields[i].name }}

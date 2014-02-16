@@ -32,35 +32,6 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
         $this->_slot        = new Slot();
     }
 
-    public function testBraced() {
-
-//        $a = 'asd *xxxxx* asd*zzzzz*';
-//        preg_match_all('#\*\w+\*|\w+#ism', $a, $matches);
-//        vd($matches);
-
-//        $compiled = $this->_compiler->compileExpression('var1 var2 var3');
-//        $compiled = $this->_compiler->compileExpression('user[name]');
-//        $compiled = $this->_compiler->compileExpression('user.name');
-//        $compiled = $this->_compiler->compileExpression('user[name] user.name');
-//        $compiled = $this->_compiler->compileExpression('user.name user.age');
-//        $compiled = $this->_compiler->compileExpression('user.nameField[\'name.first\']');
-//        $compiled = $this->_compiler->compileExpression('user["field".nameField[\'name.first\']] city[id_city]');
-//        $compiled = $this->_compiler->compileExpression('user."field"');
-//        $expression = '((a.a == b.b) || (c.a == (d.b == d.a)))';
-//        $expression = '(a.a == b.b) || (c.a == (d.b == d.a))';
-//        $simpleBracePattern = '#\((([^()]*|(?R))*)\)#';
-//        $braced = array();
-//        preg_match_all($simpleBracePattern, $expression, $braced);
-//vd($braced);
-//        $compiled = $this->_compiler->compileExpression('user->test()');
-//        $compiled = $this->_compiler->compileExpression('a|var_dump');
-
-
-//        $compiled = $this->_compiler->compileExpression('user["name"]|strtolower');
-//        vd($compiled);
-    }
-
-
     public function testVarsExpression() {
         $this->_testFileExpressions('templates/expressions/01.vars');
     }
@@ -92,6 +63,39 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
         $this->_testFileTemplates('templates/control_structure/02.if.slot');
         $this->_testFileTemplates('templates/control_structure/03.foreach.slot');
     }
+
+    public function testSlot() {
+        $this->_testTemplatesExecution('02.complex.slot', array(
+            'name'      => 'Sasha',
+            'float'     => '9.2',
+            'products'  => array(
+                array(
+                    'id'    => 1,
+                    'title' => 'Wisky' . "\n",
+                ),
+                array(
+                    'id'    => 2,
+                    'title' => 'Apple' . "\n",
+                )
+            )
+        ));
+    }
+
+    protected function _testTemplatesExecution($path, $vars) {
+        $files = GLOB('templates/' . $path);
+        if (empty($files)) {
+            $this->fail('files not found in '.$path);
+        }
+        $this->_slot->setTemplateDir(__DIR__ . '/templates/');
+        $this->_slot->setCompileDir(__DIR__ . '/compiled/');
+
+        foreach($files as $file) {
+            $expectation    = trim(file_get_contents('expectations/' . substr($file, 10, -4) . 'php'));
+            $compiled       = trim($this->_slot->fetchTemplate('02.complex.slot', $vars));
+            $this->assertEquals($expectation, $compiled, 'working with: '.$file);
+        }
+    }
+
 
     protected function _testFileTemplates($path) {
         $files = GLOB($path);
