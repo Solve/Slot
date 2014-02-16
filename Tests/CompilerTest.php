@@ -35,7 +35,14 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testBraced() {
-        $compiled = $this->_compiler->compileExpression('user[\'field\'.nameField[\'name\']]');
+//        $a = 'asd *xxxxx* asd*zzzzz*';
+//        preg_match_all('#\*\w+\*|\w+#ism', $a, $matches);
+//        vd($matches);
+
+//        $compiled = $this->_compiler->compileExpression('var1 var2 var3');
+//        $compiled = $this->_compiler->compileExpression('user[name]');
+//        $compiled = $this->_compiler->compileExpression('user[name] user["name"] user[name]');
+        $compiled = $this->_compiler->compileExpression('user["field".nameField[\'name.first\']] city[id_city]');
         vd($compiled);
     }
 

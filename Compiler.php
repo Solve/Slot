@@ -58,6 +58,8 @@ class Compiler {
      */
     private $_slotInstance;
 
+    private $_hashesQuoted      = array();
+
     /**
      * @var array methods that available as system modifiers
      */
@@ -114,15 +116,86 @@ class Compiler {
      * @return string result
      */
     public function compileExpression($expression) {
-        $result = '';
 
-        $bracedRegexp = '#\[(.*)\]#ism';
+        $quotes = array('"', "'");
+
+        $quotedPattern = "#(?:(?:\"(?:\\\\\"|[^\"])+\")|(?:'(?:\\'|[^'])+'))#isU";
+        $matches = array();
+//        preg_match_all($quotedPattern, $expression, $matches);
+        $expression = preg_replace_callback($quotedPattern, array($this, '_processQuotedHash'), $expression);
+
+        $expression = $this->_processUnquotedExpression($expression);
+//vd($expression);
+
+
+//        $haystack = "something else before 'Lars\' Teststring in quotes' something else after";
+//        preg_match("/(?:(?:\"(?:\\\\\"|[^\"])+\")|(?:'(?:\\'|[^'])+'))/is",$haystack,$match);
+
+//        if (in_array($expression[0], $quotes) && ($expression[0] == $expression[mb_strlen($expression) - 1])) {
+//            return $expression;
+//        }
+        $expression = str_replace(array_keys($this->_hashesQuoted), $this->_hashesQuoted, $expression);
+        return $expression;
+    }
+
+    private function _processUnquotedExpression($expression) {
+        $isSimpleExpression = true;
+        $highLevelHash      = array();
+
+        $squareBracePattern = '#\[[^\s]+\]#ism';
         $braced = array();
-        preg_match_all($bracedRegexp, $expression, $braced);
-        vd($expression, $braced);
+        preg_match_all($squareBracePattern, $expression, $braced);
+        if (!empty($braced[0])) {
+            foreach($braced[0] as $item) {
+                $hash = '*'.md5($item).'*';
+                $highLevelHash[$hash] = '[' . $this->_processUnquotedExpression(substr($item, 1, -1)) . ']';
+                $expression = str_replace($item, $hash, $expression);
+            }
+//            $isSimpleExpression = false;
+        }
+
+        if (strpos($expression, '.') !== false) {
+            $pointPattern = '#\.#';
+            $pointedParts = preg_split($pointPattern, $expression, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+            $expression = array_shift($pointedParts);
+            foreach($pointedParts as $part) {
+                $expression .= '[' . $this->_processUnquotedExpression($part) . ']';
+            }
+            $isSimpleExpression = false;
+        }
+
+        if ($isSimpleExpression) {
+            $varPattern = '#\*\w+\*|\w+#is';
+            $expression = preg_replace_callback($varPattern, array($this, '_processVarExpression'), $expression);
+        }
+
+//        preg_match_all($varPattern, $expression, $matches);
+        $expression = str_replace(array_keys($highLevelHash), $highLevelHash, $expression);
+        return $expression;
+    }
 
 
-        return $result;
+    /**
+     * Preg match replace callback
+     * @param $pregMatchResult
+     * @return string
+     */
+    private function _processVarExpression($pregMatchResult) {
+        if (($pregMatchResult[0][0] == '*') && ($pregMatchResult[0][strlen($pregMatchResult[0]) - 1] == '*')) {
+            return $pregMatchResult[0];
+        }
+        return '$__lv[\'' . $pregMatchResult[0] . '\']';
+    }
+
+    /**
+     * Preg match replace callback
+     * @param $pregMatchResult
+     * @return string
+     */
+    private function _processQuotedHash($pregMatchResult) {
+        $hash = '*' . md5($pregMatchResult[0]) . '*';
+        $this->_hashesQuoted[$hash] = $pregMatchResult[0];
+        return $hash;
     }
 
     /**
