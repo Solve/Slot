@@ -13,7 +13,6 @@ use Solve\Slot\Compiler;
 use Solve\Slot\Slot;
 
 require_once '../Compiler.php';
-require_once '../functions.php';
 
 class CompilerTest extends \PHPUnit_Framework_TestCase {
 
