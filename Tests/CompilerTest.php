@@ -66,26 +66,30 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testOperandsExpression() {
-        $this->_testFileExpressions('templates/expressions/operands');
+        $this->_testFileExpressions('templates/expressions/02.operands');
     }
 
     public function testMethodsExpression() {
-        $this->_testFileExpressions('templates/expressions/methods');
+        $this->_testFileExpressions('templates/expressions/03.methods');
     }
 
     public function testModifiersExpression() {
-        $this->_testFileExpressions('templates/expressions/modifiers');
+        $this->_testFileExpressions('templates/expressions/04.modifiers');
     }
 
     public function testComments() {
         $this->_testFileTemplates('templates/00.comments.slot');
     }
 
-    public function testSimpleTemplate() {
+    public function testVarsTemplate() {
         $this->_slot->getCompiler()->setEscapingStrategy('none');
         $this->_testFileTemplates('templates/01.vars.slot');
     }
 
+    public function testControlTemplate() {
+        $this->_slot->getCompiler()->setEscapingStrategy('none');
+        $this->_testFileTemplates('templates/control_structure/01.if.slot');
+    }
 
     protected function _testFileTemplates($path) {
         $files = GLOB($path);

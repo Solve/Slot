@@ -1,0 +1,15 @@
+{{ if a }}
+hello a
+{{ elseif b }}
+hello b
+{{ else }}
+not hello
+{{ endif }}
+
+{{ if user.name|strtolower == "vasya" }}
+ok
+{{ endif }}
+
+{{ if ((a || b) && c->d() || e.d) }}
+ok
+{{ endif }}
