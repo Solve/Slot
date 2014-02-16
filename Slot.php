@@ -36,7 +36,6 @@ class Slot {
      */
     private $_compiler;
 
-
     /**
      * @var string path to compiled templates
      */
@@ -48,6 +47,20 @@ class Slot {
     private $_templateDir;
 
     private $_tplVars;
+
+    public function __construct() {
+        $this->_config      = new ArrayStorage($this->_config);
+        $this->_compiler    = new Compiler();
+
+        $this->registerInternalBlocks();
+    }
+
+    /**
+     * @return Compiler
+     */
+    public function getCompiler() {
+        return $this->_compiler;
+    }
 
     /**
      * @param string $compileDir
@@ -80,13 +93,6 @@ class Slot {
         return $this->_templateDir;
     }
 
-    public function __construct() {
-        $this->_config      = new ArrayStorage($this->_config);
-        $this->_compiler    = new Compiler($this->_config, $this);
-
-        $this->registerInternalBlocks();
-    }
-
     protected function registerInternalBlocks() {
         $blocks = GLOB(__DIR__ . '/Blocks/*.php');
         foreach($blocks as $block) {
@@ -111,7 +117,7 @@ class Slot {
 
     public function processTemplate($templatePath) {
         $source = file_get_contents($templatePath);
-        return $this->_compiler->processSource($source);
+        return $this->_compiler->compileSource($source);
     }
 
     public function fetchTemplate($templatePath, $variables = array(), $params = array()) {

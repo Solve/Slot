@@ -2,3 +2,6 @@
 {{ info|raw:full }}
 {{ " hello from string " }}
 {{ " hello from string "|trim }}
+{{ (user.name|trim == "vasya") }}
+{{ var info = "hello" }}
+{{ var fieldName = fields[i].name }}

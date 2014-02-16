@@ -15,7 +15,7 @@ use Solve\Slot\Compiler;
  * Class BaseBlock
  * @package Solve\Slot
  *
- * Class BaseBlock is used to ...
+ * Class BaseBlock describes basic block methods
  *
  * @version 1.0
  * @author Alexandr Viniychuk <alexandr.viniychuk@icloud.com>

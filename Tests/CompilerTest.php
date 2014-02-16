@@ -10,6 +10,7 @@
 namespace Solve\Slot\Tests;
 
 use Solve\Slot\Compiler;
+use Solve\Slot\Slot;
 
 require_once '../Compiler.php';
 require_once '../functions.php';
@@ -21,11 +22,15 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
      */
     public $_compiler;
 
+    /**
+     * @var Slot
+     */
+    public $_slot;
+
     protected function setUp() {
-        $this->_compiler = new Compiler();
+        $this->_compiler    = new Compiler();
+        $this->_slot        = new Slot();
     }
-
-
 
     public function testBraced() {
 
@@ -77,7 +82,7 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testSimpleTemplate() {
-        $this->_compiler->setEscapingStrategy('none');
+        $this->_slot->getCompiler()->setEscapingStrategy('none');
         $this->_testFileTemplates('templates/01.vars.slot');
     }
 
@@ -90,7 +95,7 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
         foreach($files as $file) {
             $source         = file_get_contents($file);
             $expectation    = trim(file_get_contents('expectations/' . substr($file, 10, -4) . 'php'));
-            $compiled       = trim($this->_compiler->compileSource($source));
+            $compiled       = trim($this->_slot->getCompiler()->compileSource($source));
             $this->assertEquals($expectation, $compiled, 'working with: '.$file);
         }
     }
