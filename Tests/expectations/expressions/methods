@@ -1,0 +1,3 @@
+$__lv['a']->getName()
+$__lv['a']->getInfo('title')
+($__lv['a']->getStatus() == 'busy')

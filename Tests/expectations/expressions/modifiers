@@ -1,0 +1,4 @@
+var_dump($__lv['a'])
+(strtolower($__lv['username']) == "vasya")
+(strtolower($__lv['user']['name']) == "vasya")
+(strtolower(trim($__lv['user']['name'])) == "vasya")

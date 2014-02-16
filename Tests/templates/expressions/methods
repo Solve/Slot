@@ -1,0 +1,3 @@
+a->getName()
+a->getInfo('title')
+(a->getStatus() == 'busy')

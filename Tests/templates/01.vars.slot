@@ -1,0 +1,4 @@
+{{ info }}
+{{ info|raw:full }}
+{{ " hello from string " }}
+{{ " hello from string "|trim }}

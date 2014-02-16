@@ -21,30 +21,95 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
      */
     public $_compiler;
 
-    public $_source;
-
     protected function setUp() {
-        $this->_source['comments'] = file_get_contents('templates/comments.slot');
         $this->_compiler = new Compiler();
     }
 
 
-    public function testComments() {
-        $compiled = $this->_compiler->stripComments($this->_source['comments']);
-        $this->assertEquals('just a text', trim($compiled));
-    }
 
     public function testBraced() {
+
 //        $a = 'asd *xxxxx* asd*zzzzz*';
 //        preg_match_all('#\*\w+\*|\w+#ism', $a, $matches);
 //        vd($matches);
 
 //        $compiled = $this->_compiler->compileExpression('var1 var2 var3');
 //        $compiled = $this->_compiler->compileExpression('user[name]');
-//        $compiled = $this->_compiler->compileExpression('user[name] user["name"] user[name]');
-        $compiled = $this->_compiler->compileExpression('user["field".nameField[\'name.first\']] city[id_city]');
-        vd($compiled);
+//        $compiled = $this->_compiler->compileExpression('user.name');
+//        $compiled = $this->_compiler->compileExpression('user[name] user.name');
+//        $compiled = $this->_compiler->compileExpression('user.name user.age');
+//        $compiled = $this->_compiler->compileExpression('user.nameField[\'name.first\']');
+//        $compiled = $this->_compiler->compileExpression('user["field".nameField[\'name.first\']] city[id_city]');
+//        $compiled = $this->_compiler->compileExpression('user."field"');
+//        $expression = '((a.a == b.b) || (c.a == (d.b == d.a)))';
+//        $expression = '(a.a == b.b) || (c.a == (d.b == d.a))';
+//        $simpleBracePattern = '#\((([^()]*|(?R))*)\)#';
+//        $braced = array();
+//        preg_match_all($simpleBracePattern, $expression, $braced);
+//vd($braced);
+//        $compiled = $this->_compiler->compileExpression('user->test()');
+//        $compiled = $this->_compiler->compileExpression('a|var_dump');
+
+
+//        $compiled = $this->_compiler->compileExpression('user["name"]|strtolower');
+//        vd($compiled);
     }
 
+
+    public function testVarsExpression() {
+        $this->_testFileExpressions('templates/expressions/01.vars');
+    }
+
+    public function testOperandsExpression() {
+        $this->_testFileExpressions('templates/expressions/operands');
+    }
+
+    public function testMethodsExpression() {
+        $this->_testFileExpressions('templates/expressions/methods');
+    }
+
+    public function testModifiersExpression() {
+        $this->_testFileExpressions('templates/expressions/modifiers');
+    }
+
+    public function testComments() {
+        $this->_testFileTemplates('templates/00.comments.slot');
+    }
+
+    public function testSimpleTemplate() {
+        $this->_compiler->setEscapingStrategy('none');
+        $this->_testFileTemplates('templates/01.vars.slot');
+    }
+
+
+    protected function _testFileTemplates($path) {
+        $files = GLOB($path);
+        if (empty($files)) {
+            $this->fail('files not found in '.$path);
+        }
+        foreach($files as $file) {
+            $source         = file_get_contents($file);
+            $expectation    = trim(file_get_contents('expectations/' . substr($file, 10, -4) . 'php'));
+            $compiled       = trim($this->_compiler->compileSource($source));
+            $this->assertEquals($expectation, $compiled, 'working with: '.$file);
+        }
+    }
+
+
+    protected function _testFileExpressions($path) {
+        $files = GLOB($path);
+        if (empty($files)) {
+            $this->fail('files not found in '.$path);
+        }
+        foreach($files as $file) {
+            $source         = file($file);
+            $expectation    = file('expectations/' . substr($file, 10));
+            foreach($source as $index => $expression) {
+                $expected = trim($expectation[$index]);
+                $compiled = $this->_compiler->compileExpression($expression);
+                $this->assertEquals($expected, $compiled, 'working with: '.$expression);
+            }
+        }
+    }
 
 }
