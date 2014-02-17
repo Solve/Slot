@@ -1,4 +1,5 @@
 var_dump($__lv['a'])
+$__lv['user']->getName()
 (strtolower($__lv['username']) == "sasha")
 (strtolower($__lv['user']['name']) == "sasha")
 (strtolower(trim($__lv['user']['name'])) == "sasha")

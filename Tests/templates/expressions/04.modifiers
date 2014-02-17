@@ -1,4 +1,5 @@
 a|var_dump
+user->getName()|raw
 (username|strtolower == "sasha")
 (user['name']|strtolower == "sasha")
 (user.name|trim|strtolower == "sasha")

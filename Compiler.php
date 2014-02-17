@@ -173,9 +173,7 @@ class Compiler {
 
         if ($isSimpleExpression) {
             $modifiersInfo = $this->_processModifiers($expression);
-            if (!empty($modifiersInfo[1])) {
-                $expression = $modifiersInfo[0];
-            }
+            $expression = $modifiersInfo[0];
             if (strpos($expression, '.') !== false) {
                 $pointPattern = '#\.#';
                 $pointedParts = preg_split($pointPattern, $expression, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
