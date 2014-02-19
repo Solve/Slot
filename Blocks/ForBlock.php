@@ -2,20 +2,22 @@
 /*
  * This file is a part of Solve framework.
  *
- * @author Alexandr Viniychuk <alexandr.viniychuk@icloud.com>
- * @copyright 2009-2014, Alexandr Viniychuk
- * created: 07.01.14 00:57
+ * @author Pavel Vodnyakoff <pavel.vodnyakoff@gmail.com>
+ * @copyright 2009-2014, Pavel Vodnyakoff
+ * created: 19.02.14 23:43
  */
 
 namespace Solve\Slot\Blocks;
 
 
 /**
- * Class EscapeStrategyBlock
+ * Class ForBlock
  * @package Solve\Slot\Blocks
  *
+ * @paired
+ *
  * @version 1.0
- * @author Alexandr Viniychuk <alexandr.viniychuk@icloud.com>
+ * @author Pavel Vodnyakoff <pavel.vodnyakoff@gmail.com>
  */
 class ForBlock extends BaseBlock {
 
