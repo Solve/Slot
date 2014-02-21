@@ -1,6 +1,12 @@
 {{ foreach user in users |noif|nocount}}
 {{ endforeach }}
 
+{{ foreach key,user in users|array_keys |noif|nocount}}
+{{ endforeach }}
+
+{{ foreach i in 0..15 |noif|nocount}}
+{{ endforeach }}
+
 {#{{ foreach user in users}}#}
 {#1#}
 {#{{ foreachelse }}#}

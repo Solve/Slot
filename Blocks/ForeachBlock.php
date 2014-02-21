@@ -8,7 +8,6 @@
  */
 
 namespace Solve\Slot\Blocks;
-use Solve\Storage\ParametersStorage;
 
 
 /**
@@ -26,26 +25,16 @@ class ForeachBlock extends BaseBlock {
 
     public function processBlockStart() {
         $res            = '<?php ';
-        $params         = new ParametersStorage($this->_params, 'index', null, 'from');
 
-        $extendedParams = array('index', null, 'from', 'key', 'name');
-        if (count($this->_params) > 3) {
-            for($i=3; $i < count($this->_params); ++$i) {
-                $paramIndex = $extendedParams[$i - 3];
-                if (($ePos = strpos($this->_params[$i], '=')) !== false) {
-                    $paramIndex = substr($this->_params[$i], 0, $ePos);
-                    $paramValue = substr($this->_params[$i], $ePos+1);
-                } else {
-                    $paramValue = $this->_params[$i];
-                }
-                $params->setDeepValue($paramIndex, $paramValue);
-            }
-        }
+        $blockRegexp    = '#((?P<key>[_\w\d]+),)?(?P<value>[_\w\d]+)\sin\s(?P<from>[|_\w\d\.]+)(\s(?P<modifiers>.*))?#isu';
+        $parts          = array();
+        preg_match($blockRegexp, $this->_token, $parts);
+        if (!empty($parts['modifiers'])) $this->_modifiers = explode('|', substr($parts['modifiers'], 1));
 
         $countName  = substr(md5(time()), 0, 10);
-        $varFrom    = $this->_compiler->compileExpression($params['from']);
-        $varKey     = $params['key'];
-        $varItem    = '$__lv[\'' . $params['index'] . '\']';
+        $varFrom    = $this->_compiler->compileExpression($parts['from']);
+        $varKey     = $parts['key'];
+        $varItem    = '$__lv[\'' . $parts['value'] . '\']';
 
         self::$_callStack[] = array(
             'modifiers' => $this->_modifiers,

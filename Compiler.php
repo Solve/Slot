@@ -171,6 +171,19 @@ class Compiler {
             }
         }
 
+        if (strpos($expression, '..') !== false) {
+            $rangeRegexp    = '#(?P<range>(["\'._\w\d]+)\.\.(["\'._\w\d]+))#isu';
+            $ranges         = array();
+            preg_match_all($rangeRegexp, $expression, $ranges);
+            foreach($ranges['range'] as $range) {
+                $rangeParts     = explode('..', $range);
+                $compiledRange  = 'range(' . $this->compileExpression($rangeParts[0])  . ', '.$this->compileExpression($rangeParts[1]) . ')';
+                $hash           = $this->getHash($range);
+                $highLevelHash[$hash] = $compiledRange;
+                $expression = str_replace($range, $hash, $expression);
+            }
+        }
+
         if ($isSimpleExpression) {
             $modifiersInfo = $this->_processModifiers($expression);
             $expression = $modifiersInfo[0];
