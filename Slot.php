@@ -50,7 +50,7 @@ class Slot {
 
     public function __construct() {
         $this->_config      = new ArrayStorage($this->_config);
-        $this->_compiler    = new Compiler();
+        $this->_compiler    = new Compiler($this);
 
         $this->registerInternalBlocks();
     }
