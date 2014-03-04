@@ -12,8 +12,8 @@ namespace Solve\Slot\Tests;
 use Solve\Slot\Compiler;
 use Solve\Slot\Slot;
 
-require_once '../vendor/autoload.php';
-require_once '../Compiler.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../Compiler.php';
 
 class CompilerTest extends \PHPUnit_Framework_TestCase {
 
@@ -31,6 +31,7 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
         $this->_compiler    = new Compiler();
         $this->_slot        = new Slot();
 //        var_dump($this->_compiler->compileExpression('user->getName()|raw'));exit;
+//        var_dump($this->_slot->getCompiler()->compileSource('{{ foreach user in users|keys |noif|nocount}}'));exit;
     }
 
     public function testVarsExpression() {
