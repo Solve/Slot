@@ -230,7 +230,7 @@ class Compiler {
         if (($var[0] == $this->_hashScopeChar) && ($var[strlen($var) - 1] == $this->_hashScopeChar)) {
             return $var;
         }
-        if (is_numeric($var)) {
+        if (is_numeric($var) || $var === "true" || $var === "false") {
             return $var;
         }
         if (!empty($pregMatchResult[1]) && ($pregMatchResult[1] == '->')) {

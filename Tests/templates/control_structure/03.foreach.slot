@@ -7,6 +7,9 @@
 {{ foreach i in 0..15 |noif|nocount}}
 {{ endforeach }}
 
+{{ foreach friend in user->getFriends() |noif|nocount }}
+{{ endforeach }}
+
 {#{{ foreach user in users}}#}
 {#1#}
 {#{{ foreachelse }}#}

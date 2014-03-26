@@ -6,3 +6,6 @@
 
 <?php foreach(range(0, 15) as $__lv['i']) : ?>
 <?php endforeach; ?>
+
+<?php foreach($__lv['user']->getFriends() as $__lv['friend']) : ?>
+<?php endforeach; ?>

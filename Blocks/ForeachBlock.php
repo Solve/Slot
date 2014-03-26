@@ -26,7 +26,7 @@ class ForeachBlock extends BaseBlock {
     public function processBlockStart() {
         $res            = '<?php ';
 
-        $blockRegexp    = '#((?P<key>[_\w\d]+),)?(?P<value>[_\w\d]+)\sin\s(?P<from>[|_\w\d\.]+)(\s(?P<modifiers>.*))?#isu';
+        $blockRegexp    = '#((?P<key>[_\w\d]+),)?(?P<value>[_\w\d]+)\sin\s(?P<from>[-|_\w\d\.\(\)>]+)(\s(?P<modifiers>.*))?#isu';
         $parts          = array();
         preg_match($blockRegexp, $this->_token, $parts);
         if (!empty($parts['modifiers'])) $this->_modifiers = explode('|', substr($parts['modifiers'], 1));
