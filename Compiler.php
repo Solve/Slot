@@ -419,7 +419,8 @@ class Compiler {
      * @return BaseBlock
      */
     private function getBlockObject($tag, $token) {
-        $blockClassName = '\Solve\Slot\Blocks\\' . Inflector::camelize($tag . 'Block');
+        $namespace = isset($this->_blocks[$tag]['namespace']) ? $this->_blocks[$tag]['namespace'] : '\Solve\Slot\Blocks\\';
+        $blockClassName = $namespace . Inflector::camelize($tag . 'Block');
         /**
          * @var BaseBlock $blockObject
          */

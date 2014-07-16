@@ -103,14 +103,15 @@ class Slot {
         }
     }
 
-    public function registerBlock($block) {
+    public function registerBlock($block, $namespace = '\Solve\Slot\Blocks\\') {
         $className = Inflector::camelize($block . 'Block');
-        $r = new \ReflectionClass('\Solve\Slot\Blocks\\' . $className);
+        $r = new \ReflectionClass($namespace . $className);
         $doc = $r->getDocComment();
 
         $config = array(
             'paired'    => strpos($doc, '@paired') !== false,
-            'runtime'   => strpos($doc, '@runtime') !== false
+            'runtime'   => strpos($doc, '@runtime') !== false,
+            'namespace' => $namespace
         );
         $this->_compiler->registerBlock($block, $config);
     }
