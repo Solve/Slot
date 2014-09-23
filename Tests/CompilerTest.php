@@ -30,8 +30,6 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
     protected function setUp() {
         $this->_compiler    = new Compiler();
         $this->_slot        = new Slot();
-//        var_dump($this->_compiler->compileExpression('user->getName()|raw'));exit;
-//        var_dump($this->_slot->getCompiler()->compileSource('{{ foreach user in users|keys |noif|nocount}}'));exit;
     }
 
     public function testVarsExpression() {
