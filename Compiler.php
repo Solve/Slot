@@ -326,7 +326,7 @@ class Compiler {
                     $mStart = $modifier . '(' . $mStart;
                     if ($modifier !== 'raw') {
                         foreach($params as $param) {
-                            $mEnd .= ','.$param;
+                            $mEnd .= ', '. $this->compileExpression($param);
                         }
                     }
                     $mEnd  .= ')';

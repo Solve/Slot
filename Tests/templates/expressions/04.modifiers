@@ -3,3 +3,4 @@ user->getName()|raw
 (username|strtolower == "sasha")
 (user['name']|strtolower == "sasha")
 (user.name|trim|strtolower == "sasha")
+a|in_array:mas
