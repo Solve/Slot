@@ -67,6 +67,8 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
     public function testSlot() {
         $this->_testTemplatesExecution('02.complex.slot', array(
             'name'      => 'Sasha',
+            'zero'      => 0,
+            'false'     => false,
             'float'     => '9.2',
             'products'  => array(
                 array(

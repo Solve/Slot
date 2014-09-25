@@ -1,4 +1,5 @@
-<?php echo !empty($__lv['info']) ? $__lv['info']: ""; ?>
+<?php echo isset($__lv['info']) ? $__lv['info']: ""; ?>
+<?php echo isset($__lv['zero']) ? $__lv['zero']: ""; ?>
 <?php echo $__lv['info']; ?>
 <?php echo 2+2-3; ?>
 <?php echo " hello from string "; ?>

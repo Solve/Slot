@@ -1,5 +1,7 @@
 Hello, Sasha!
 
+This is 0 and false.
+
 1: Wisky
 2: Apple
 

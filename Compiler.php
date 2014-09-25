@@ -357,10 +357,17 @@ class Compiler {
                 $varValue  = 'htmlentities(' . $varValue . ', ENT_COMPAT, "UTF-8")';
             }
         }
-        if ($isFunctional || ($isRaw && strpos($token, 'raw:full') !== false) || (strpos($varValue, '$') === false)) {
-            $res .= 'echo '. $varValue;
+
+        if (!$isRaw && ($isFunctional || (strpos($varValue, '$') === false))) {
+            $res .= 'echo ' . $varValue;
+        } elseif ($isRaw) {
+            if (strpos($token, 'raw:bool') !== false) {
+                $res .= 'echo ' . $varValue . '? "true" : "false"';
+            } else {
+                $res .= 'echo ' . $varValue;
+            }
         } else {
-            $res .= 'echo !empty('. $varExpression . ') ? ' . $varValue . ': ""';
+            $res .= 'echo isset('. $varExpression . ') ? ' . $varValue . ': ""';
         }
         $res .= '; ?>';
         return $res;

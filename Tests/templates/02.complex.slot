@@ -1,5 +1,7 @@
 Hello, {{ name }}!
 
+This is {{ zero }} and {{ false|raw:bool }}.
+
 {{ foreach product in products }}
 {{ product.id }}: {{ product.title }}
 {{ endforeach }}
