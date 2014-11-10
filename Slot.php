@@ -121,6 +121,13 @@ class Slot {
         return $this->_compiler->compileSource($source);
     }
 
+    /**
+     * @param $templatePath
+     * @param array $variables
+     * @param array|ArrayStorage $params
+     * @return string
+     * @throws \Exception
+     */
     public function fetchTemplate($templatePath, $variables = array(), $params = array()) {
         if (!empty($variables)) {
             $this->_tplVars = $variables;
@@ -139,7 +146,7 @@ class Slot {
                 foreach($old_files as $file) if (is_file($file)) @unlink($file);
 
                 $content = '<?php $__lv = &$this->_tplVars; ?>';
-                $content .= $this->processTemplate($templatePath, $variables);
+                $content .= $this->processTemplate($templatePath);
 
                 file_put_contents($compilePath, $content);
             }
