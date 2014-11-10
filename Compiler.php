@@ -8,6 +8,7 @@
  */
 
 namespace Solve\Slot;
+
 use Solve\Slot\Blocks\BaseBlock;
 use Solve\Storage\ArrayStorage;
 use Solve\Utils\Inflector;
@@ -41,25 +42,25 @@ class Compiler {
     /**
      * @var ArrayStorage
      */
-    private $_config            = array(
-        'commentStart'  => '{#',
-        'commentEnd'    => '#}',
+    private $_config = array(
+        'commentStart' => '{#',
+        'commentEnd'   => '#}',
 
-        'tokenStart'    => '{{',
-        'tokenEnd'      => '}}',
+        'tokenStart'   => '{{',
+        'tokenEnd'     => '}}',
 
-        'blockClose'    => 'end',
+        'blockClose'   => 'end',
     );
 
-    private $_escapingStrategy  = 'html';
+    private $_escapingStrategy = 'html';
     /**
      * @var Slot instance of SLOT class
      */
     private $_slotInstance;
 
-    private $_hashesQuoted      = array();
-
-    private $_hashScopeChar     = '@';
+    private $_hashesQuoted  = array();
+    private $_hashScopeChar = '@';
+    private $_literalsCache = array();
 
     /**
      * @var array methods that available as system modifiers
@@ -72,11 +73,11 @@ class Compiler {
      * @param Slot $slot
      */
     public function __construct(Slot $slot = null) {
-        $this->_config          = new ArrayStorage((array)$this->_config);
+        $this->_config = new ArrayStorage((array)$this->_config);
 
-        $this->_tokenStack      = new ArrayStorage();
-        $this->_blocks          = new ArrayStorage();
-        $this->_slotInstance    = $slot;
+        $this->_tokenStack   = new ArrayStorage();
+        $this->_blocks       = new ArrayStorage();
+        $this->_slotInstance = $slot;
     }
 
     /**
@@ -112,12 +113,61 @@ class Compiler {
         return $source;
     }
 
+    public function saveLiterals($source) {
+        $literalTokenStart = '#' . $this->_config['tokenStart'] . '\s*literal\s*' . $this->_config['tokenEnd'] . '#';
+        $literalTokenEnd   = '#' . $this->_config['tokenStart'] . '\s*literalend\s*' . $this->_config['tokenEnd'] . '#';
+
+        $starts = array();
+        preg_match_all($literalTokenStart, $source, $starts, PREG_OFFSET_CAPTURE);
+        if (!empty($starts[0])) {
+            $result = '';
+            $ends = array();
+            preg_match_all($literalTokenEnd, $source, $ends, PREG_OFFSET_CAPTURE, $starts[0][0][1]);
+            if (count($starts[0]) !== count($ends[0])) {
+                throw new \Exception('Invalid {{ literal }} tags count');
+            }
+            $literalsIndex = count($this->_literalsCache);
+            $previousEndIndex = 0;
+            foreach ($starts[0] as $index => $location) {
+
+                $result .= substr($source, $previousEndIndex, $location[1] - $previousEndIndex) . '__LITERAL'.$literalsIndex.'__';
+                $contentStartPosition = $location[1] + strlen($location[0]);
+                $this->_literalsCache[$literalsIndex] = array(
+                    'start' => $location[1],
+                    'end'   => $ends[0][$index][1] + strlen($ends[0][$index][0]),
+                    'content' => substr($source, $contentStartPosition, $ends[0][$index][1] - $contentStartPosition)
+                );
+                $previousEndIndex = $this->_literalsCache[$literalsIndex]['end'];
+                $literalsIndex++;
+            }
+            $source = $result . substr($source, $previousEndIndex);
+        }
+        return $source;
+    }
+
+    public function restoreLiterals($source) {
+        if (empty($this->_literalsCache)) return $source;
+
+        $source = preg_replace_callback('#__LITERAL(\d+)__#', array($this, 'onRestoreLiterals'), $source);
+        return $source;
+    }
+
+    private function onRestoreLiterals($matches) {
+        if (array_key_exists($matches[1], $this->_literalsCache)) {
+            $content = $this->_literalsCache[$matches[1]];
+            unset($this->_literalsCache[$matches[1]]);
+            return $content['content'];
+        } else {
+            return "";
+        }
+    }
+
     /**
      * @param string $expression
      * @return string result
      */
     public function compileExpression($expression) {
-        $expression = trim($expression);
+        $expression    = trim($expression);
         $quotedPattern = "#(?:(?:\"(?:\\\\\"|[^\"])+\")|(?:'(?:\\'|[^'])+'))#isU";
 //        $matches = array();
 //        preg_match_all($quotedPattern, $expression, $matches);
@@ -125,7 +175,7 @@ class Compiler {
 
         $expression = $this->_processUnquotedExpression($expression);
         $expression = str_replace(array_keys($this->_hashesQuoted), $this->_hashesQuoted, $expression);
-        $expression = str_replace('~', '.' , $expression);
+        $expression = str_replace('~', '.', $expression);
         return $expression;
     }
 
@@ -134,10 +184,10 @@ class Compiler {
         $highLevelHash      = array();
 
         $squareBracePattern = '#\[[^\s]+\]#ism';
-        $braced = array();
+        $braced             = array();
         preg_match_all($squareBracePattern, $expression, $braced);
         if (!empty($braced[0])) {
-            foreach($braced[0] as $item) {
+            foreach ($braced[0] as $item) {
                 $hash                 = $this->getHash($item);
                 $highLevelHash[$hash] = '[' . $this->_processUnquotedExpression(substr($item, 1, -1)) . ']';
                 $expression           = str_replace($item, $hash, $expression);
@@ -145,10 +195,10 @@ class Compiler {
         }
 
         $simpleBracePattern = '#\((([^()]+|(?R))*)\)#ism';
-        $braced = array();
+        $braced             = array();
         preg_match_all($simpleBracePattern, $expression, $braced);
         if (!empty($braced[0])) {
-            foreach($braced[0] as $item) {
+            foreach ($braced[0] as $item) {
                 if ($item == '()') continue;
 
                 $hash                 = $this->getHash($item);
@@ -158,51 +208,51 @@ class Compiler {
         }
 
         if (strpos($expression, ' ') !== false) {
-            $spacedParts = array();
+            $spacedParts  = array();
             $spacePattern = '#"(?:\\\\.|[^\\\\"])*"|\S+#';
             preg_match_all($spacePattern, $expression, $spacedParts);
             if (!empty($spacedParts[0])) {
                 $expression = '';
-                foreach($spacedParts[0] as $item) {
+                foreach ($spacedParts[0] as $item) {
                     $expression .= ' ' . $this->_processUnquotedExpression($item);
                 }
-                $expression = substr($expression, 1);
+                $expression         = substr($expression, 1);
                 $isSimpleExpression = false;
             }
         }
 
         if (strpos($expression, '..') !== false) {
-            $rangeRegexp    = '#(?P<range>(["\'._\w\d]+)\.\.(["\'._\w\d]+))#isu';
-            $ranges         = array();
+            $rangeRegexp = '#(?P<range>(["\'._\w\d]+)\.\.(["\'._\w\d]+))#isu';
+            $ranges      = array();
             preg_match_all($rangeRegexp, $expression, $ranges);
-            foreach($ranges['range'] as $range) {
-                $rangeParts     = explode('..', $range);
-                $compiledRange  = 'range(' . $this->compileExpression($rangeParts[0])  . ', '.$this->compileExpression($rangeParts[1]) . ')';
-                $hash           = $this->getHash($range);
+            foreach ($ranges['range'] as $range) {
+                $rangeParts           = explode('..', $range);
+                $compiledRange        = 'range(' . $this->compileExpression($rangeParts[0]) . ', ' . $this->compileExpression($rangeParts[1]) . ')';
+                $hash                 = $this->getHash($range);
                 $highLevelHash[$hash] = $compiledRange;
-                $expression = str_replace($range, $hash, $expression);
+                $expression           = str_replace($range, $hash, $expression);
             }
         }
 
         if ($isSimpleExpression) {
             $modifiersInfo = $this->_processModifiers($expression);
-            $expression = $modifiersInfo[0];
+            $expression    = $modifiersInfo[0];
             if (strpos($expression, '.') !== false) {
                 $pointPattern = '#\.#';
                 $pointedParts = preg_split($pointPattern, $expression, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-                $expression = array_shift($pointedParts);
-                foreach($pointedParts as $part) {
+                $expression   = array_shift($pointedParts);
+                foreach ($pointedParts as $part) {
                     if ($this->checkForSimpleString($part)) {
-                        $value  = '[\'' . $part . '\']';
+                        $value = '[\'' . $part . '\']';
                     } else {
-                        $value  = '[' . $this->_processUnquotedExpression($part) . ']';
+                        $value = '[' . $this->_processUnquotedExpression($part) . ']';
                     }
                     $hash                 = $this->getHash($value);
                     $highLevelHash[$hash] = $value;
-                    $expression          .= $hash;
+                    $expression .= $hash;
                 }
             }
-            $varPattern = '#'.$this->_hashScopeChar.'\w+'.$this->_hashScopeChar.'|(->)?\w+(\|[_\w\d:]+)?#is';
+            $varPattern = '#' . $this->_hashScopeChar . '\w+' . $this->_hashScopeChar . '|(->)?\w+(\|[_\w\d:]+)?#is';
             $expression = preg_replace_callback($varPattern, array($this, '_varRegexpCallback'), $expression);
             if (!empty($modifiersInfo[1])) {
                 $expression = $modifiersInfo[1] . $expression . $modifiersInfo[2];
@@ -210,7 +260,7 @@ class Compiler {
         }
 
         $highLevelHash = array_reverse($highLevelHash);
-        $expression = str_replace(array_keys($highLevelHash), $highLevelHash, $expression);
+        $expression    = str_replace(array_keys($highLevelHash), $highLevelHash, $expression);
         return $expression;
     }
 
@@ -247,7 +297,7 @@ class Compiler {
      * @return string
      */
     private function _quotesRegexpCallback($pregMatchResult) {
-        $hash = $this->getHash($pregMatchResult[0]);
+        $hash                       = $this->getHash($pregMatchResult[0]);
         $this->_hashesQuoted[$hash] = $pregMatchResult[0];
         return $hash;
     }
@@ -263,8 +313,10 @@ class Compiler {
      */
     public function compileSource($source) {
         $source = $this->stripComments($source);
+        $source = $this->saveLiterals($source);
 
-        $result = preg_replace_callback('#'.$this->_config['tokenStart']. '(.*)' . $this->_config['tokenEnd']. '#smU', array($this, 'onTokenFound'), $source);
+        $result = preg_replace_callback('#' . $this->_config['tokenStart'] . '(.*)' . $this->_config['tokenEnd'] . '#smU', array($this, 'onTokenFound'), $source);
+        $result = $this->restoreLiterals($result);
         return $result;
     }
 
@@ -283,7 +335,7 @@ class Compiler {
 
         if ($this->_blocks->has($tag)) {
             if ($this->_blocks->getDeepValue($tag . '/runtime')) {
-                $res = '<?php $this->_compiler->invokeBlock(\''.$tag.'\', '. $this->compileExpression($params) .'); ?>';
+                $res = '<?php $this->_compiler->invokeBlock(\'' . $tag . '\', ' . $this->compileExpression($params) . '); ?>';
             } else {
                 $res = $this->onBlockTagOpen($tag, $params);
             }
@@ -303,18 +355,18 @@ class Compiler {
      * @throws \Exception
      */
     private function _processModifiers($expression) {
-        $mStart     = '';
-        $mEnd       = '';
-        $rawEcho    = false;
+        $mStart  = '';
+        $mEnd    = '';
+        $rawEcho = false;
 
         /** process modifiers */
         if (strpos($expression, '|') !== false && strpos($expression, '||') === false) {
-            $modifiers = explode('|', $expression);
-            $expression  = array_shift($modifiers);
+            $modifiers  = explode('|', $expression);
+            $expression = array_shift($modifiers);
             foreach ($modifiers as $modifier) {
                 $params = array();
                 if (strpos($modifier, ':') !== false) {
-                    $params = explode(':', $modifier);
+                    $params   = explode(':', $modifier);
                     $modifier = array_shift($params);
                 }
                 if ($modifier == 'raw') {
@@ -325,13 +377,13 @@ class Compiler {
                 if ($this->isCallable($modifier)) {
                     $mStart = $modifier . '(' . $mStart;
                     if ($modifier !== 'raw') {
-                        foreach($params as $param) {
-                            $mEnd .= ', '. $this->compileExpression($param);
+                        foreach ($params as $param) {
+                            $mEnd .= ', ' . $this->compileExpression($param);
                         }
                     }
-                    $mEnd  .= ')';
+                    $mEnd .= ')';
                 } else {
-                    throw new \Exception('SLOT compiler error: undefined modifier '.$modifier);
+                    throw new \Exception('SLOT compiler error: undefined modifier ' . $modifier);
                 }
             }
         }
@@ -347,14 +399,14 @@ class Compiler {
     private function onVarEchoToken($token) {
         $res = '<?php ';
 
-        $varExpression  = $this->compileExpression($token);
-        $varValue       = $varExpression;
-        $isFunctional   = preg_match('#[-+*/\(|]+#', $varValue);
-        $isRaw          = strpos($token, 'raw') !== false;
+        $varExpression = $this->compileExpression($token);
+        $varValue      = $varExpression;
+        $isFunctional  = preg_match('#[-+*/\(|]+#', $varValue);
+        $isRaw         = strpos($token, 'raw') !== false;
         /** process 01.vars escaping strategies */
         if ($this->getEscapingStrategy() == 'html' && $isRaw && !$isFunctional) {
             if (strpos($varExpression, 'htmlentities') === false) {
-                $varValue  = 'htmlentities(' . $varValue . ', ENT_COMPAT, "UTF-8")';
+                $varValue = 'htmlentities(' . $varValue . ', ENT_COMPAT, "UTF-8")';
             }
         }
 
@@ -367,7 +419,7 @@ class Compiler {
                 $res .= 'echo ' . $varValue;
             }
         } else {
-            $res .= 'echo isset('. $varExpression . ') ? ' . $varValue . ': ""';
+            $res .= 'echo isset(' . $varExpression . ') ? ' . $varValue . ': ""';
         }
         $res .= '; ?>';
         return $res;
@@ -389,8 +441,8 @@ class Compiler {
         /**
          * @var BaseBlock $blockObject
          */
-        $blockObject            = $this->getBlockObject($tag, $token);
-        $this->_tokenStack[]    = $blockObject;
+        $blockObject         = $this->getBlockObject($tag, $token);
+        $this->_tokenStack[] = $blockObject;
 
         return $blockObject->processBlockStart();
     }
@@ -406,7 +458,7 @@ class Compiler {
             if (!empty($this->_expectations)) {
                 $expected = $this->_expectations[count($this->_expectations) - 1];
                 if ($expected != $tag) {
-                    throw new \Exception('Error parsing template: Unexpected tag "'.$tag.'", expected: "'.$expected.'"');
+                    throw new \Exception('Error parsing template: Unexpected tag "' . $tag . '", expected: "' . $expected . '"');
                 } else {
                     array_pop($this->_expectations);
                 }
@@ -426,12 +478,12 @@ class Compiler {
      * @return BaseBlock
      */
     private function getBlockObject($tag, $token) {
-        $namespace = isset($this->_blocks[$tag]['namespace']) ? $this->_blocks[$tag]['namespace'] : '\Solve\Slot\Blocks\\';
+        $namespace      = isset($this->_blocks[$tag]['namespace']) ? $this->_blocks[$tag]['namespace'] : '\Solve\Slot\Blocks\\';
         $blockClassName = $namespace . Inflector::camelize($tag . 'Block');
         /**
          * @var BaseBlock $blockObject
          */
-        $blockObject         = new $blockClassName($token, $this);
+        $blockObject = new $blockClassName($token, $this);
         return $blockObject;
     }
 
@@ -470,8 +522,8 @@ class Compiler {
     }
 
     public function parseSpacedArguments($string) {
-        $string      = trim($string);
-        $spacedParts = array();
+        $string       = trim($string);
+        $spacedParts  = array();
         $spacePattern = '#"(?:\\\\.|[^\\\\"])*"|\S+#';
         preg_match_all($spacePattern, $string, $spacedParts);
 

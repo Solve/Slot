@@ -83,6 +83,10 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
         ));
     }
 
+    public function testLiteral() {
+        $this->_testFileTemplates('templates/03.literal.slot', array());
+    }
+
     protected function _testTemplatesExecution($path, $vars) {
         $files = GLOB('templates/' . $path);
         if (empty($files)) {
